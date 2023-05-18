@@ -1,0 +1,101 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+#define BOARD_SIZE 8
+
+typedef struct {
+    int row;
+    int col;
+} Move;
+
+typedef struct {
+    int player;
+    int king;
+} Piece;
+
+typedef struct {
+    Piece** board;
+    int currentPlayer;
+} Game;
+
+// Função para criar o tabuleiro vazio
+Piece** createBoard() {
+    Piece** board = (Piece**)malloc(BOARD_SIZE * sizeof(Piece*));
+    for (int i = 0; i < BOARD_SIZE; i++) {
+        board[i] = (Piece*)malloc(BOARD_SIZE * sizeof(Piece));
+        for (int j = 0; j < BOARD_SIZE; j++) {
+            board[i][j].player = 0;
+            board[i][j].king = 0;
+        }
+    }
+    return board;
+}
+
+// Função para liberar a memória do tabuleiro
+void freeBoard(Piece** board) {
+    for (int i = 0; i < BOARD_SIZE; i++) {
+        free(board[i]);
+    }
+    free(board);
+}
+
+// Função para inicializar o jogo
+Game* initializeGame() {
+    Game* game = (Game*)malloc(sizeof(Game));
+    game->board = createBoard();
+    game->currentPlayer = 1;
+    // Inicializar as peças pretas
+    for (int i = 0; i < 3; i++) {
+        for (int j = 0; j < BOARD_SIZE; j++) {
+            if ((i + j) % 2 == 0) {
+                game->board[i][j].player = 1;
+            }
+        }
+    }
+    // Inicializar as peças brancas
+    for (int i = BOARD_SIZE - 3; i < BOARD_SIZE; i++) {
+        for (int j = 0; j < BOARD_SIZE; j++) {
+            if ((i + j) % 2 == 0) {
+                game->board[i][j].player = 2;
+            }
+        }
+    }
+    return game;
+}
+
+// Função para imprimir o tabuleiro
+void printBoard(Piece** board) {
+    printf("   0  1  2  3  4  5  6  7\n");
+    for (int i = 0; i < BOARD_SIZE; i++) {
+        printf("%d ", i);
+        for (int j = 0; j < BOARD_SIZE; j++) {
+            if (board[i][j].player == 0) {
+                printf("[ ]");
+            } else if (board[i][j].player == 1) {
+                if (board[i][j].king) {
+                    printf("[B]");
+                } else {
+                    printf("[b]");
+                }
+            } else if (board[i][j].player == 2) {
+                if (board[i][j].king) {
+                    printf("[W]");
+                } else {
+                    printf("[w]");
+                }
+            }
+        }
+        printf("\n");
+    }
+}
+
+// Função para verificar se a posição está dentro dos limites do tabuleiro
+int isValidPosition(int row, int col) {
+    return row >= 0 && row < BOARD_SIZE && col >= 0 && col < BOARD_SIZE;
+}
+
+// Função para verificar se uma jogada é válida
+int isValidMove(Game* game, int row, int col, int newRow, int newCol) {
+    Piece** board = game->board;
+    int player = game->currentPlayer;
+    // Verificar
